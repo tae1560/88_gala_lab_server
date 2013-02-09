@@ -8,7 +8,7 @@ namespace :server do
     class BasicServer < GServer
       def serve(io)
         loop do
-
+          puts "#{io} has connected"
 
           begin
             name = get_user_name io
@@ -40,6 +40,8 @@ namespace :server do
 
     server = BasicServer.new(1234)
     server.start
+    puts "Server has been started"
+
     loop do
       break if server.stopped?
     end
