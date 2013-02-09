@@ -8,8 +8,11 @@ def get_user_name(io)
     begin
       data = JSON.parse(str)
 
-      if result.has_key? 'name'
-        return data['name']
+      if data.has_key? 'type'
+        if data['type'].equal? "username"
+          return data['username']
+        end
+
       end
     rescue
       bt = $!.backtrace * "\n  "
