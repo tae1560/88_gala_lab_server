@@ -22,7 +22,7 @@
       <file leaf-file-name="socket_server.rake" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/tasks/socket_server.rake">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="23" selection-start="243" selection-end="243" vertical-scroll-proportion="0.2669903">
+            <state line="8" column="21" selection-start="130" selection-end="130" vertical-scroll-proportion="0.1699029">
               <folding />
             </state>
           </provider>
@@ -404,7 +404,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/tasks/socket_server.rake">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="23" selection-start="243" selection-end="243" vertical-scroll-proportion="0.2669903">
+        <state line="8" column="21" selection-start="130" selection-end="130" vertical-scroll-proportion="0.1699029">
           <folding />
         </state>
       </provider>

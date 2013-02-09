@@ -5,6 +5,8 @@ def get_user_name(io)
   str = ""
   while line = io.gets;
     str += line
+
+    puts "str : #{str}"
     begin
       data = JSON.parse(str)
 
