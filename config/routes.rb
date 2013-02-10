@@ -1,4 +1,6 @@
 GalaLabServer::Application.routes.draw do
+  match 'login' => 'users#login'
+  match 'join' => 'users#join'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

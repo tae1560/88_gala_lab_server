@@ -1,6 +1,15 @@
 # coding: utf-8
 
 namespace :server do
+
+  task :temp => :environment do
+    user = User.new
+    puts user.inspect
+    user.save
+
+    puts User.all
+  end
+
   task :start => :environment do
 
     class UserInformation
