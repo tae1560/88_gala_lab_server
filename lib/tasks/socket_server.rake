@@ -61,6 +61,16 @@ namespace :server do
       }
 
 
+      # 테스트 스킬 공격
+      @@functions["test_attack_skill"] = lambda { |io, json_data|
+        user_information = @@logon_queue[io]
+        puts json_data.to_s
+
+        #data = {"type" => "matching_request", "user_information" => user_information1.to_json}
+        #user_information.io.puts data.to_s
+      }
+
+
 
       # TODO
       # 1. 무작위게임 신청
