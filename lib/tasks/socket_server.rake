@@ -116,7 +116,7 @@ namespace :server do
 
     def reading_socket io
       while line = io.gets;
-        debug "original_data : #{json_data}"
+        debug "original_data : #{line}"
         json_data = JSON.parse(line)
         debug "json_data : #{json_data.inspect}"
 
