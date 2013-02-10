@@ -31,7 +31,7 @@
       <file leaf-file-name="users_controller.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/controllers/users_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="0" selection-start="429" selection-end="429" vertical-scroll-proportion="0.6674877">
+            <state line="2" column="36" selection-start="94" selection-end="94" vertical-scroll-proportion="0.073891625">
               <folding />
             </state>
           </provider>
@@ -58,7 +58,7 @@
       <file leaf-file-name="routes.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config/routes.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="29" selection-start="104" selection-end="104" vertical-scroll-proportion="0.0">
+            <state line="4" column="18" selection-start="125" selection-end="125" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -77,9 +77,9 @@
         <option value="$PROJECT_DIR$/Gemfile" />
         <option value="$PROJECT_DIR$/config/database.yml" />
         <option value="$PROJECT_DIR$/lib/tasks/socket_server.rake" />
-        <option value="$PROJECT_DIR$/config/routes.rb" />
         <option value="$PROJECT_DIR$/app/models/user.rb" />
         <option value="$PROJECT_DIR$/db/migrate/20130210120026_create_users.rb" />
+        <option value="$PROJECT_DIR$/config/routes.rb" />
         <option value="$PROJECT_DIR$/app/controllers/users_controller.rb" />
       </list>
     </option>
@@ -624,13 +624,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/routes.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="29" selection-start="104" selection-end="104" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/db/migrate/20130210120026_create_users.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="3" column="58" selection-start="146" selection-end="146" vertical-scroll-proportion="0.0">
@@ -638,9 +631,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/config/routes.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="18" selection-start="125" selection-end="125" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/users_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="0" selection-start="429" selection-end="429" vertical-scroll-proportion="0.6674877">
+        <state line="2" column="36" selection-start="94" selection-end="94" vertical-scroll-proportion="0.073891625">
           <folding />
         </state>
       </provider>

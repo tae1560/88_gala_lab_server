@@ -1,4 +1,8 @@
 class UsersController < ApplicationController
+  def index
+    render :json => User.all.inspect
+  end
+
   def login
     id = params[:id]
     password = params[:password]
