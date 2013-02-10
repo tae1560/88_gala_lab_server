@@ -7,7 +7,7 @@ class UsersController < ApplicationController
     id = params[:id]
     password = params[:password]
 
-    user = User.where(:id => id).where(:password => password).first
+    user = User.where(:login_id => id).where(:password => password).first
 
     result = {}
     if user
@@ -26,7 +26,7 @@ class UsersController < ApplicationController
 
     result = {}
 
-    user = User.new(:id => id, :password => password, :character => character)
+    user = User.new(:login_id => id, :password => password, :character => character)
     if user.save
       result[:status] = "success"
     else
