@@ -56,8 +56,8 @@ namespace :server do
       @@functions["attack_skill"] = lambda { |io, json_data|
         user_information = @@logon_queue[io]
 
-        data = {"type" => "matching_request", "user_information" => user_information1.to_json}
-        user_information.io.puts data.to_s
+        data = {"type" => "attack_skill", "user_information" => user_information1.to_json}
+        user_information.enemy_io.puts data.to_s
       }
 
 
@@ -66,8 +66,10 @@ namespace :server do
         user_information = @@logon_queue[io]
         puts json_data.to_s
 
-        #data = {"type" => "matching_request", "user_information" => user_information1.to_json}
-        #user_information.io.puts data.to_s
+        data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
+        puts data.to_s
+
+        user_information.io.puts data.to_s
       }
 
 
