@@ -45,25 +45,8 @@ namespace :server do
       # 1. 무작위게임 신청
       @@functions["request_matching"] = lambda{|user_information, json_data|
         debug "client data : #{json_data.to_s}"
-        debug "user_information : #{user_information.inspect}"
 
-        unless @@waiting_queue.include? user_information
-          debug "@@waiting_queue.include"
-          @@waiting_queue.push user_information
-        end
-        debug "@@waiting_queue : #{@@waiting_queue.inspect}"
-        debug "@@waiting_queue : #{@@waiting_queue.length}"
-
-        if @@waiting_queue.length >= 2
-          #matching 0, 1
-          debug "@@waiting_queue.length >= 2"
-
-          user_information1 = @@waiting_queue[0]
-          user_information2 = @@waiting_queue[1]
-
-          @@waiting_queue.delete user_information1
-          @@waiting_queue.delete user_information2
-
+        send_matching_information_function = lambda{ |user_information1, user_information2|
           user_information1.enemy_io = user_information2.io
           user_information2.enemy_io = user_information1.io
 
@@ -74,6 +57,40 @@ namespace :server do
           data = {"type" => "request_matching", "user_information" => user_information2.to_json}
           debug "server data : #{data.to_s}"
           user_information2.io.puts data.to_s
+        }
+
+        if json_data["friend_id"]
+          # matching with friend
+
+          # find user
+          friend = User.where(:login_id => json_data["friend_id"]).first
+
+          # not me
+          unless friend.id == user_information.user.id
+            # current connected user
+            if @@logon_queue[friend.id]
+              send_matching_information_function.call @@logon_queue[friend.id], user_information
+            end
+          end
+
+        else
+          # random matching
+
+          unless @@waiting_queue.include? user_information
+            @@waiting_queue.push user_information
+          end
+
+          if @@waiting_queue.length >= 2
+            #matching 0, 1
+
+            user_information1 = @@waiting_queue[0]
+            user_information2 = @@waiting_queue[1]
+
+            @@waiting_queue.delete user_information1
+            @@waiting_queue.delete user_information2
+
+            send_matching_information_function.call user_information1, user_information2
+          end
         end
       }
 
@@ -245,22 +262,18 @@ namespace :server do
 
             # 받고 나서 서버 통신 시작
             reading_socket user_information
-
-            @@logon_queue[user.id] = nil
           end
 
           # 대기
-
         rescue
           puts "rescue"
           bt = $!.backtrace * "\n  "
           ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
-
-          @@logon_queue[user.id] = nil
         ensure
           puts "ensure"
-          @@logon_queue[user.id] = nil
-          break
+          if user
+            @@logon_queue[user.id] = nil
+          end
         end
       end
       io.close
