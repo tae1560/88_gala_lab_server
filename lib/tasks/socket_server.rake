@@ -222,6 +222,7 @@ namespace :server do
         end
 
       end
+      io.close
       return nil
     end
 
@@ -276,6 +277,9 @@ namespace :server do
           puts "ensure"
           if user
             @@logon_queue[user.id] = nil
+          end
+          if io.closed?
+            break
           end
         end
       end
