@@ -298,6 +298,12 @@ namespace :server do
     ss = TCPServer.new(1234)
 
     debug "Server has been started"
+    File.open("test.txt", "w") do | file |
+      file.puts $$
+      Process.daemon
+      file.puts $$
+    end
+
     loop {
       Thread.start(ss.accept) { |io|
         client_logic(io)
