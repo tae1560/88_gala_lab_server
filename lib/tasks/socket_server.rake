@@ -133,6 +133,7 @@ namespace :server do
               user = User.where(:login_id => id).where(:password => password).first
 
               result = {}
+              result[:type] = "login"
               if user
                 result[:status] = "success"
               else
@@ -148,7 +149,7 @@ namespace :server do
               character = data["character"]
 
               result = {}
-
+              result[:type] = "join"
               user = User.new(:login_id => id, :password => password, :character => character)
               if user.save
                 result[:status] = "success"
