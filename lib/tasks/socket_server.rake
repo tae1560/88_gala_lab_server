@@ -100,10 +100,6 @@ namespace :server do
       }
 
 
-      render :json => @users
-
-
-
       # TODO
       # 1. 무작위게임 신청
       # 2. 친구와 게임 신청
