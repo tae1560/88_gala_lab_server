@@ -129,11 +129,11 @@ namespace :server do
               user = User.where(:login_id => id).where(:password => password).first
 
               result = {}
-              result[:type] = "login"
+              result["type"] = "login"
               if user
-                result[:status] = "success"
+                result["status"] = "success"
               else
-                result[:status] = "failed"
+                result["status"] = "failed"
               end
 
               io.puts result.to_s
@@ -145,13 +145,13 @@ namespace :server do
               character = data["character"]
 
               result = {}
-              result[:type] = "join"
+              result["type"] = "join"
               user = User.new(:login_id => id, :password => password, :character => character)
               if user.save
-                result[:status] = "success"
+                result["status"] = "success"
               else
-                result[:status] = "failed"
-                result[:message] = user.errors.full_messages
+                result["status"] = "failed"
+                result["message"] = user.errors.full_messages
               end
 
               io.puts result.to_s
