@@ -245,6 +245,7 @@ namespace :server do
     # each client
     def client_logic(io)
       debug "#{io} has connected"
+
       loop do
         begin
           puts "begin"
@@ -269,17 +270,17 @@ namespace :server do
           puts "rescue"
           bt = $!.backtrace * "\n  "
           ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
+
+          break
         ensure
           puts "ensure"
           if user
             @@logon_queue[user.id] = nil
           end
-          if io.closed?
-            break
-          end
         end
       end
       io.close
+
       debug "#{io} has disconnected"
     end
 
