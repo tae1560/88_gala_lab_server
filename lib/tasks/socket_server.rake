@@ -173,6 +173,7 @@ namespace :server do
                 result["status"] = "success"
               else
                 result["status"] = "failed"
+                result["message"] = "id or password is not valid"
               end
 
               io.puts result.to_s
