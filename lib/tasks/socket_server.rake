@@ -80,21 +80,21 @@ namespace :server do
         User.find_each do |user|
           current_user = {}
           current_user["id"] = user.login_id
-          current_user["character"] = user.character
+          current_user["character"] = user.character.to_i
           current_user["number_of_combo"] = user.number_of_combo
           current_user["number_of_wins"] = user.number_of_wins
 
           if @@logon_queue[user.id]
-            current_user["logon"] = 1
+            current_user["is_logon"] = 1
           else
-            current_user["logon"] = 0
+            current_user["is_logon"] = 0
           end
 
           users.push current_user
         end
 
         data = {"type" => "request_friends", "friends" => users.to_s}
-        debug "server data : #{json_data.to_s}"
+        debug "server data : #{data.to_s}"
 
         user_information.io.puts data.to_s
       }
@@ -107,6 +107,50 @@ namespace :server do
       # 4.
 
 
+      # login and join
+      @@functions["login"] = lambda { |user_information, json_data|
+        debug "client data : #{json_data.to_s}"
+
+        id = json_data["id"]
+        password = json_data["password"]
+
+        user = User.where(:login_id => id).where(:password => password).first
+
+        result = {"type" => "login"}
+        if user
+          result["status"] = "success"
+        else
+          result["status"] = "failed"
+        end
+
+        debug "server data : #{result.to_s}"
+        user_information.io.puts result.to_s
+
+        return user
+      }
+
+      @@functions["join"] = lambda { |user_information, json_data|
+        debug "client data : #{json_data.to_s}"
+
+        id = json_data["id"]
+        password = json_data["password"]
+        character = json_data["character"]
+
+        result = {}
+        result["type"] = "join"
+        user = User.new(:login_id => id, :password => password, :character => character)
+        if user.save
+          result["status"] = "success"
+        else
+          result["status"] = "failed"
+          result["message"] = user.errors.full_messages
+        end
+
+        debug "server data : #{result.to_s}"
+        user_information.io.puts result.to_s
+
+        return user
+      }
 
     end
 
