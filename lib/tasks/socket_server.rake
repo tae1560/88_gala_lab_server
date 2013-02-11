@@ -274,6 +274,9 @@ namespace :server do
           if user
             @@logon_queue[user.id] = nil
           end
+          if io.closed?
+            break
+          end
         end
       end
       io.close
