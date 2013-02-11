@@ -45,6 +45,9 @@ namespace :server do
       # 1. 무작위게임 신청
       @@functions["request_matching"] = lambda{|user_information, json_data|
         debug "client data : #{json_data.to_s}"
+        debug "@@waiting_queue : #{@@waiting_queue.inspect}"
+        debug "@@waiting_queue : #{@@waiting_queue.length}"
+
         unless @@waiting_queue.include? user_information
           @@waiting_queue.push user_information
         end
@@ -223,7 +226,7 @@ namespace :server do
       loop do
         begin
           puts "begin"
-          
+
           # 사용자 정보를 받는다.
           user = doLogin io
           debug "user = #{user.inspect}"
