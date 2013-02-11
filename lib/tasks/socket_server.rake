@@ -111,45 +111,23 @@ namespace :server do
       @@functions["login"] = lambda { |user_information, json_data|
         debug "client data : #{json_data.to_s}"
 
-        id = json_data["id"]
-        password = json_data["password"]
-
-        user = User.where(:login_id => id).where(:password => password).first
-
         result = {"type" => "login"}
-        if user
-          result["status"] = "success"
-        else
-          result["status"] = "failed"
-        end
+        result["status"] = "failed"
+        result["message"] = "already logon"
 
         debug "server data : #{result.to_s}"
         user_information.io.puts result.to_s
-
-        return user
       }
 
       @@functions["join"] = lambda { |user_information, json_data|
         debug "client data : #{json_data.to_s}"
 
-        id = json_data["id"]
-        password = json_data["password"]
-        character = json_data["character"]
-
-        result = {}
-        result["type"] = "join"
-        user = User.new(:login_id => id, :password => password, :character => character)
-        if user.save
-          result["status"] = "success"
-        else
-          result["status"] = "failed"
-          result["message"] = user.errors.full_messages
-        end
+        result = {"type" => "join"}
+        result["status"] = "failed"
+        result["message"] = "already logon"
 
         debug "server data : #{result.to_s}"
         user_information.io.puts result.to_s
-
-        return user
       }
 
     end
@@ -225,42 +203,46 @@ namespace :server do
           else
             puts "function #{type} is not implemented"
           end
-
         end
       end
     end
 
     # each client
     def client_logic(io)
-      # 사용자 정보를 받는다.
-      user = doLogin io
-      debug "user = #{user.inspect}"
+      debug "#{io} has connected"
+      loop do
+        begin
+          # 사용자 정보를 받는다.
+          user = doLogin io
+          debug "user = #{user.inspect}"
 
-      # login validation
-      if user and user.persisted? and @@logon_queue[user.id] == nil
-        user_information = UserInformation.new
-        user_information.user = user
-        user_information.io = io
-        @@logon_queue[user.id] = user_information
+          # login validation
+          if user and user.persisted? and @@logon_queue[user.id] == nil
+            user_information = UserInformation.new
+            user_information.user = user
+            user_information.io = io
+            @@logon_queue[user.id] = user_information
 
-        # 받고 나서 서버 통신 시작
-        debug "#{io} has connected"
-        loop do
-          begin
-            # 대기
+            # 받고 나서 서버 통신 시작
             reading_socket user_information
-          rescue
-            bt = $!.backtrace * "\n  "
-            ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
-          ensure
-            io.close
-            break
-          end
-        end
-        debug "#{io} has disconnected"
 
-        @@logon_queue[user.id] = nil
+            @@logon_queue[user.id] = nil
+          end
+
+          # 대기
+
+        rescue
+          bt = $!.backtrace * "\n  "
+          ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
+
+          @@logon_queue[user.id] = nil
+        ensure
+          @@logon_queue[user.id] = nil
+          break
+        end
       end
+      io.close
+      debug "#{io} has disconnected"
     end
 
 
