@@ -7,9 +7,25 @@ namespace :server do
       attr_accessor :io, :enemy_io, :user
 
       def to_json
-        json_data = {}
-        json_data["user"] = self.user.inspect
-        return json_data
+        UserInformation.to_json self.user
+      end
+
+      def self.to_json user
+        current_user = {}
+        if user
+          current_user["id"] = user.login_id
+          current_user["character"] = user.character.to_i
+          current_user["number_of_combo"] = user.number_of_combo
+          current_user["number_of_wins"] = user.number_of_wins
+
+          if @@logon_queue[user.id]
+            current_user["is_logon"] = 1
+          else
+            current_user["is_logon"] = 0
+          end
+        end
+
+        return current_user
       end
     end
 
@@ -27,8 +43,8 @@ namespace :server do
     end
     def make_functions
       # 1. 무작위게임 신청
-      @@functions["matching_request"] = lambda{|user_information, json_data|
-
+      @@functions["request_matching"] = lambda{|user_information, json_data|
+        debug "client data : #{json_data.to_s}"
         unless @@waiting_queue.include? user_information
           @@waiting_queue.push user_information
         end
@@ -44,10 +60,12 @@ namespace :server do
           user_information1.enemy_io = user_information2.io
           user_information2.enemy_io = user_information1.io
 
-          data = {"type" => "matching_request", "user_information" => user_information1.to_json}
+          data = {"type" => "request_matching", "user_information" => user_information1.to_json}
+          debug "server data : #{data.to_s}"
           user_information1.io.puts data.to_s
 
-          data = {"type" => "matching_request", "user_information" => user_information2.to_json}
+          data = {"type" => "request_matching", "user_information" => user_information2.to_json}
+          debug "server data : #{data.to_s}"
           user_information2.io.puts data.to_s
         end
       }
@@ -55,7 +73,11 @@ namespace :server do
 
       # 스킬 공격
       @@functions["attack_skill"] = lambda { |user_information, json_data|
-        data = {"type" => "attack_skill", "user_information" => user_information1.to_json}
+        debug "client data : #{json_data.to_s}"
+
+        data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
+        debug "server data : #{data.to_s}"
+
         user_information.enemy_io.puts data.to_s
       }
 
@@ -65,7 +87,7 @@ namespace :server do
         debug "client data : #{json_data.to_s}"
 
         data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
-        puts data.to_s
+        debug "server data : #{data.to_s}"
 
         user_information.io.puts data.to_s
       }
@@ -78,19 +100,7 @@ namespace :server do
         users = []
 
         User.find_each do |user|
-          current_user = {}
-          current_user["id"] = user.login_id
-          current_user["character"] = user.character.to_i
-          current_user["number_of_combo"] = user.number_of_combo
-          current_user["number_of_wins"] = user.number_of_wins
-
-          if @@logon_queue[user.id]
-            current_user["is_logon"] = 1
-          else
-            current_user["is_logon"] = 0
-          end
-
-          users.push current_user
+          users.push UserInformation.to_json user
         end
 
         data = {"type" => "request_friends", "friends" => users.to_s}
