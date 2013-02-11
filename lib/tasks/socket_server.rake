@@ -45,15 +45,19 @@ namespace :server do
       # 1. 무작위게임 신청
       @@functions["request_matching"] = lambda{|user_information, json_data|
         debug "client data : #{json_data.to_s}"
+        debug "user_information : #{user_information.inspect}"
+
+        unless @@waiting_queue.include? user_information
+          debug "@@waiting_queue.include"
+          @@waiting_queue.push user_information
+        end
         debug "@@waiting_queue : #{@@waiting_queue.inspect}"
         debug "@@waiting_queue : #{@@waiting_queue.length}"
 
-        unless @@waiting_queue.include? user_information
-          @@waiting_queue.push user_information
-        end
-
         if @@waiting_queue.length >= 2
           #matching 0, 1
+          debug "@@waiting_queue.length >= 2"
+          
           user_information1 = @@waiting_queue[0]
           user_information2 = @@waiting_queue[1]
 
