@@ -1,23 +1,14 @@
 # coding: utf-8
 
 namespace :server do
-
-  task :temp => :environment do
-    user = User.new
-    puts user.inspect
-    user.save
-
-    puts User.all
-  end
-
   task :start => :environment do
 
     class UserInformation
-      attr_accessor :name, :io, :enemy_io
+      attr_accessor :io, :enemy_io, :user
 
       def to_json
         json_data = {}
-        json_data["name"] = self.name
+        json_data["user"] = self.user.inspect
         return json_data
       end
     end
@@ -29,16 +20,17 @@ namespace :server do
       puts "initialize"
 
       @@functions = {} # type, lambda
-      @@logon_queue = {} # io, user_information
+      @@logon_queue = {} # id, user_information
       @@waiting_queue = [] # user_information
 
       make_functions
     end
     def make_functions
       # 1. 무작위게임 신청
-      @@functions["matching_request"] = lambda{|io, json_data|
-        unless @@waiting_queue.include? @user_information
-          @@waiting_queue.push @user_information
+      @@functions["matching_request"] = lambda{|user_information, json_data|
+
+        unless @@waiting_queue.include? user_information
+          @@waiting_queue.push user_information
         end
 
         if @@waiting_queue.length >= 2
@@ -62,24 +54,53 @@ namespace :server do
 
 
       # 스킬 공격
-      @@functions["attack_skill"] = lambda { |io, json_data|
-        user_information = @@logon_queue[io]
-
+      @@functions["attack_skill"] = lambda { |user_information, json_data|
         data = {"type" => "attack_skill", "user_information" => user_information1.to_json}
         user_information.enemy_io.puts data.to_s
       }
 
 
       # 테스트 스킬 공격
-      @@functions["test_attack_skill"] = lambda { |io, json_data|
-        user_information = @@logon_queue[io]
-        puts json_data.to_s
+      @@functions["test_attack_skill"] = lambda { |user_information, json_data|
+        debug "client data : #{json_data.to_s}"
 
         data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
         puts data.to_s
 
         user_information.io.puts data.to_s
       }
+
+
+      # 친구 목록 요청
+      @@functions["request_friends"] = lambda { |user_information, json_data|
+        debug "client data : #{json_data.to_s}"
+
+        users = []
+
+        User.find_each do |user|
+          current_user = {}
+          current_user["id"] = user.login_id
+          current_user["character"] = user.character
+          current_user["number_of_combo"] = user.number_of_combo
+          current_user["number_of_wins"] = user.number_of_wins
+
+          if @@logon_queue[user.id]
+            current_user["logon"] = 1
+          else
+            current_user["logon"] = 0
+          end
+
+          users.push current_user
+        end
+
+        data = {"type" => "request_friends", "friends" => users.to_s}
+        debug "server data : #{json_data.to_s}"
+
+        user_information.io.puts data.to_s
+      }
+
+
+      render :json => @users
 
 
 
@@ -98,15 +119,47 @@ namespace :server do
     end
 
     # 사용자 정보를 받는다.
-    def get_user_name(io)
+    def doLogin(io)
       str = ""
       while line = io.gets;
         begin
           data = JSON.parse(line)
 
           if data.has_key? 'type'
-            if data['type'] == "username"
-              return data['username']
+            if data['type'] == "login"
+              id = data["id"]
+              password = data["password"]
+
+              user = User.where(:login_id => id).where(:password => password).first
+
+              result = {}
+              if user
+                result[:status] = "success"
+              else
+                result[:status] = "failed"
+              end
+
+              io.puts result.to_s
+
+              return user
+            elsif data['type'] == "join"
+              id = data["id"]
+              password = data["password"]
+              character = data["character"]
+
+              result = {}
+
+              user = User.new(:login_id => id, :password => password, :character => character)
+              if user.save
+                result[:status] = "success"
+              else
+                result[:status] = "failed"
+                result[:message] = user.errors.full_messages
+              end
+
+              io.puts result.to_s
+
+              return user
             end
           end
         rescue
@@ -118,15 +171,8 @@ namespace :server do
       return nil
     end
 
-    def valid_login? name
-      if name and name.length > 0
-        return true
-      end
-      return false
-    end
-
-    def reading_socket io
-      while line = io.gets;
+    def reading_socket user_information
+      while line = user_information.io.gets;
         debug "original_data : #{line}"
         json_data = JSON.parse(line)
         debug "json_data : #{json_data.inspect}"
@@ -134,7 +180,7 @@ namespace :server do
         type = json_data['type']
         if type
           if @@functions[type]
-            @@functions[type].call io, json_data
+            @@functions[type].call user_information, json_data
           else
             puts "function #{type} is not implemented"
           end
@@ -146,22 +192,22 @@ namespace :server do
     # each client
     def client_logic(io)
       # 사용자 정보를 받는다.
-      name = get_user_name io
-      debug "name = #{name}"
+      user = doLogin io
+      debug "user = #{user.inspect}"
 
       # login validation
-      if valid_login? name
-        @user_information = UserInformation.new
-        @user_information.name = name
-        @user_information.io = io
-        @@logon_queue[io] = @user_information
+      if user and user.persisted? and @@logon_queue[user.id] == nil
+        user_information = UserInformation.new
+        user_information.user = user
+        user_information.io = io
+        @@logon_queue[user.id] = user_information
 
         # 받고 나서 서버 통신 시작
         debug "#{io} has connected"
         loop do
           begin
             # 대기
-            reading_socket io
+            reading_socket user_information
           rescue
             bt = $!.backtrace * "\n  "
             ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
@@ -171,6 +217,8 @@ namespace :server do
           end
         end
         debug "#{io} has disconnected"
+
+        @@logon_queue[user.id] = nil
       end
     end
 

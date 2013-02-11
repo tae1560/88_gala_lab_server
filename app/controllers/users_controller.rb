@@ -1,6 +1,16 @@
 class UsersController < ApplicationController
   def index
-    render :json => User.all.inspect
+    @users = []
+    User.find_each do |user|
+      user_information = {}
+      user_information["id"] = user.login_id
+      user_information["character"] = user.character
+      user_information["number_of_combo"] = user.number_of_combo
+      user_information["number_of_wins"] = user.number_of_wins
+
+      @users.push user_information
+    end
+    render :json => @users
   end
 
   def login
