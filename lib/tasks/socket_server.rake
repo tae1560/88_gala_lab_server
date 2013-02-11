@@ -32,7 +32,7 @@ namespace :server do
     class Server
 
     end
-    def initialize
+    def init
       puts "initialize"
 
       @@functions = {} # type, lambda
@@ -57,7 +57,7 @@ namespace :server do
         if @@waiting_queue.length >= 2
           #matching 0, 1
           debug "@@waiting_queue.length >= 2"
-          
+
           user_information1 = @@waiting_queue[0]
           user_information2 = @@waiting_queue[1]
 
@@ -270,7 +270,7 @@ namespace :server do
     require 'socket'  # TCPServer
 
     # initialize
-    initialize
+    init
 
     ss = TCPServer.new(1234)
 
