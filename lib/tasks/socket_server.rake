@@ -279,6 +279,7 @@ namespace :server do
             @@logon_queue[user.id] = nil
           end
           if io.closed?
+            debug "#{io} has disconnected - on ensure"
             break
           end
         end
