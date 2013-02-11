@@ -222,6 +222,8 @@ namespace :server do
       debug "#{io} has connected"
       loop do
         begin
+          puts "begin"
+          
           # 사용자 정보를 받는다.
           user = doLogin io
           debug "user = #{user.inspect}"
@@ -242,11 +244,13 @@ namespace :server do
           # 대기
 
         rescue
+          puts "rescue"
           bt = $!.backtrace * "\n  "
           ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
 
           @@logon_queue[user.id] = nil
         ensure
+          puts "ensure"
           @@logon_queue[user.id] = nil
           break
         end
