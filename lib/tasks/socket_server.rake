@@ -127,7 +127,7 @@ namespace :server do
           users.push UserInformation.to_json user
         end
 
-        data = {"type" => "request_friends", "friends" => users.to_s}
+        data = {"type" => "request_friends", "friends" => users}
         debug "server data : #{JSON.generate data}"
 
         user_information.io.puts JSON.generate data
