@@ -193,7 +193,7 @@ namespace :server do
                 result["message"] = "id or password is not valid"
               end
 
-              debug "server data : #{j(result)}"
+              debug "server data : #{j(result).strip}"
               io.puts j(result)
 
               return user
@@ -212,7 +212,7 @@ namespace :server do
                 result["message"] = user.errors.full_messages
               end
 
-              debug "server data : #{j(result)}"
+              debug "server data : #{j(result).strip}"
               io.puts j(result)
 
               return user
