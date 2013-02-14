@@ -51,12 +51,12 @@ namespace :server do
           user_information2.enemy_io = user_information1.io
 
           data = {"type" => "request_matching", "user_information" => user_information1.to_json}
-          debug "server data : #{data.to_s}"
-          user_information1.io.puts data.to_s
+          debug "server data : #{j data}"
+          user_information1.io.puts j data
 
           data = {"type" => "request_matching", "user_information" => user_information2.to_json}
-          debug "server data : #{data.to_s}"
-          user_information2.io.puts data.to_s
+          debug "server data : #{j data}"
+          user_information2.io.puts j data
         }
 
         if json_data["friend_id"]
@@ -100,9 +100,9 @@ namespace :server do
         debug "client data : #{json_data.to_s}"
 
         data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
-        debug "server data : #{data.to_s}"
+        debug "server data : #{j data}"
 
-        user_information.enemy_io.puts data.to_s
+        user_information.enemy_io.puts j data
       }
 
 
@@ -111,9 +111,9 @@ namespace :server do
         debug "client data : #{json_data.to_s}"
 
         data = {"type" => "attack_skill", "skill_type" => json_data["skill_type"], "user_information" => user_information.to_json}
-        debug "server data : #{data.to_s}"
+        debug "server data : #{j data}"
 
-        user_information.io.puts data.to_s
+        user_information.io.puts j data
       }
 
 
@@ -128,9 +128,9 @@ namespace :server do
         end
 
         data = {"type" => "request_friends", "friends" => users.to_s}
-        debug "server data : #{data.to_s}"
+        debug "server data : #{j data}"
 
-        user_information.io.puts data.to_s
+        user_information.io.puts j data
       }
 
 
@@ -149,8 +149,8 @@ namespace :server do
         result["status"] = "failed"
         result["message"] = "already logon"
 
-        debug "server data : #{result.to_s}"
-        user_information.io.puts result.to_s
+        debug "server data : #{j result}"
+        user_information.io.puts j result
       }
 
       @@functions["join"] = lambda { |user_information, json_data|
@@ -160,8 +160,8 @@ namespace :server do
         result["status"] = "failed"
         result["message"] = "already logon"
 
-        debug "server data : #{result.to_s}"
-        user_information.io.puts result.to_s
+        debug "server data : #{j result}"
+        user_information.io.puts j result
       }
 
     end
