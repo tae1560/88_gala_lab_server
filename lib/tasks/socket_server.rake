@@ -51,8 +51,8 @@ namespace :server do
           user_information2.enemy_io = user_information1.io
 
           data = {"type" => "request_matching", "user_information" => user_information1.to_json}
-          debug "server data : #{j data}"
-          user_information1.io.puts j data
+          debug "server data : #{j(data)}"
+          user_information1.io.puts j(data)
 
           data = {"type" => "request_matching", "user_information" => user_information2.to_json}
           debug "server data : #{j data}"
@@ -193,7 +193,8 @@ namespace :server do
                 result["message"] = "id or password is not valid"
               end
 
-              io.puts result.to_s
+              debug "server data : #{j(result)}"
+              io.puts j(result)
 
               return user
             elsif data['type'] == "join"
@@ -211,7 +212,8 @@ namespace :server do
                 result["message"] = user.errors.full_messages
               end
 
-              io.puts result.to_s
+              debug "server data : #{j(result)}"
+              io.puts j(result)
 
               return user
             end
@@ -298,11 +300,11 @@ namespace :server do
     ss = TCPServer.new(1234)
 
     debug "Server has been started"
-    File.open("test.txt", "w") do | file |
-      file.puts $$
-      Process.daemon
-      file.puts $$
-    end
+    #File.open("test.txt", "w") do | file |
+    #  file.puts $$
+    #  Process.daemon
+    #  file.puts $$
+    #end
 
     loop {
       Thread.start(ss.accept) { |io|
