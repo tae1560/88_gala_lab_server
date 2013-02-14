@@ -75,11 +75,11 @@ namespace :server do
           user_information2.attack_queue = []
 
           # send data to clients
-          data = {"type" => "request_matching", "user_information" => user_information1.to_json}
+          data = {"type" => "request_matching", "user_information" => user_information2.to_json}
           debug "server data : #{JSON.generate data}"
           user_information1.io.puts JSON.generate data
 
-          data = {"type" => "request_matching", "user_information" => user_information2.to_json}
+          data = {"type" => "request_matching", "user_information" => user_information1.to_json}
           debug "server data : #{JSON.generate data}"
           user_information2.io.puts JSON.generate data
         }
@@ -282,6 +282,7 @@ namespace :server do
               result["type"] = "login"
               if user
                 result["status"] = "success"
+                # TODO : UserInformation.to_json user 로 수정하기
                 result["user"] = user.to_json
                 # 내정보 받아오기
               else
@@ -303,6 +304,7 @@ namespace :server do
               user = User.new(:login_id => id, :password => password, :character => character)
               if user.save
                 result["status"] = "success"
+                # TODO : UserInformation.to_json user 로 수정하기
                 result["user"] = user.to_json
               else
                 result["status"] = "failed"
