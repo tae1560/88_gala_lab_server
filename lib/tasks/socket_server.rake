@@ -193,7 +193,7 @@ namespace :server do
                 result["message"] = "id or password is not valid"
               end
 
-              debug "server data : #{j(result).strip}"
+              debug "server data : #{j(result)}"
               io.puts j(result)
 
               return user
@@ -212,7 +212,7 @@ namespace :server do
                 result["message"] = user.errors.full_messages
               end
 
-              debug "server data : #{j(result).strip}"
+              debug "server data : #{j(result)}"
               io.puts j(result)
 
               return user
@@ -293,6 +293,7 @@ namespace :server do
 
 
     require 'socket'  # TCPServer
+    require 'json'
 
     # initialize
     init
