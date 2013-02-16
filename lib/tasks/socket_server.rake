@@ -34,7 +34,8 @@ namespace :server do
 
       @@functions = {} # type, lambda
       @@logon_queue = {} # id, user_information
-      @@waiting_queue = [] # user_information
+      @@random_matching_waiting_queue = [] # user_information
+      @@friend_matching_waiting_queue = [] # io
 
       make_functions
     end
@@ -57,6 +58,10 @@ namespace :server do
         data = {"type" => "request_friends", "friends" => users}
         debug "server data : #{JSON.generate data}"
         user_information.io.puts JSON.generate data
+
+        unless @@friend_matching_waiting_queue.include? user_information.user.id
+          @@friend_matching_waiting_queue.push user_information.user.id
+        end
       }
 
       # 무작위게임 신청
@@ -82,6 +87,13 @@ namespace :server do
           data = {"type" => "request_matching", "user_information" => user_information1.to_json}
           debug "server data : #{JSON.generate data}"
           user_information2.io.puts JSON.generate data
+
+          if @@friend_matching_waiting_queue.include? user_information1.user.id
+            @@friend_matching_waiting_queue.delete user_information1.user.id
+          end
+          if @@friend_matching_waiting_queue.include? user_information2.user.id
+            @@friend_matching_waiting_queue.delete user_information2.user.id
+          end
         }
 
         if json_data["friend_id"]
@@ -93,26 +105,26 @@ namespace :server do
           # not me
           unless friend.id == user_information.user.id
             # current connected user
-            if @@logon_queue[friend.id]
-              send_matching_information_function.call @@logon_queue[friend.id], user_information
+            if @@friend_matching_waiting_queue[friend.id]
+              send_matching_information_function.call @@friend_matching_waiting_queue[friend.id], user_information
             end
           end
 
         else
           # random matching
 
-          unless @@waiting_queue.include? user_information
-            @@waiting_queue.push user_information
+          unless @@random_matching_waiting_queue.include? user_information
+            @@random_matching_waiting_queue.push user_information
           end
 
-          if @@waiting_queue.length >= 2
+          if @@random_matching_waiting_queue.length >= 2
             #matching 0, 1
 
-            user_information1 = @@waiting_queue[0]
-            user_information2 = @@waiting_queue[1]
+            user_information1 = @@random_matching_waiting_queue[0]
+            user_information2 = @@random_matching_waiting_queue[1]
 
-            @@waiting_queue.delete user_information1
-            @@waiting_queue.delete user_information2
+            @@random_matching_waiting_queue.delete user_information1
+            @@random_matching_waiting_queue.delete user_information2
 
             send_matching_information_function.call user_information1, user_information2
           end
@@ -358,6 +370,7 @@ namespace :server do
 
           # login validation
           if user and user.persisted? and @@logon_queue[user.id] == nil
+            # login
             user_information = UserInformation.new
             user_information.user = user
             user_information.io = io
@@ -378,6 +391,9 @@ namespace :server do
           puts "ensure"
           if user
             @@logon_queue[user.id] = nil
+            if @@friend_matching_waiting_queue.include? user.id
+              @@friend_matching_waiting_queue.delete user.id
+            end
           end
           if io.closed?
             debug "#{io} has disconnected - on ensure"
