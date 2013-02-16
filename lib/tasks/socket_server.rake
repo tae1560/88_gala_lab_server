@@ -35,7 +35,7 @@ namespace :server do
       @@functions = {} # type, lambda
       @@logon_queue = {} # id, user_information
       @@random_matching_waiting_queue = [] # user_information
-      @@friend_matching_waiting_queue = [] # io
+      @@friend_matching_waiting_queue = [] # id
 
       make_functions
     end
@@ -61,6 +61,8 @@ namespace :server do
 
         unless @@friend_matching_waiting_queue.include? user_information.user.id
           @@friend_matching_waiting_queue.push user_information.user.id
+
+          debug "@@friend_matching_waiting_queue.push #{user_information.user.id}"
         end
       }
 
@@ -106,7 +108,7 @@ namespace :server do
           unless friend.id == user_information.user.id
             # current connected user
             if @@friend_matching_waiting_queue[friend.id]
-              send_matching_information_function.call @@friend_matching_waiting_queue[friend.id], user_information
+              send_matching_information_function.call @@logon_queue[friend.id], user_information
             end
           end
 
@@ -386,6 +388,12 @@ namespace :server do
           bt = $!.backtrace * "\n  "
           ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
 
+          if user
+            @@logon_queue[user.id] = nil
+            if @@friend_matching_waiting_queue.include? user.id
+              @@friend_matching_waiting_queue.delete user.id
+            end
+          end
           break
         ensure
           puts "ensure"
