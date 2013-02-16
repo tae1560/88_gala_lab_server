@@ -17,6 +17,9 @@ namespace :server do
           current_user["character"] = user.character.to_i
           current_user["number_of_combo"] = user.number_of_combo
           current_user["number_of_wins"] = user.number_of_wins
+          current_user["max_number_of_wins"] = user.max_number_of_wins
+          current_user["total_wins"] = user.total_wins
+          current_user["total_loses"] = user.total_loses
 
           if @@logon_queue[user.id]
             current_user["is_logon"] = 1
@@ -214,26 +217,26 @@ namespace :server do
 
           # 클라이언트에 끝나면 끝났다는 정보 알려주기
           if winner_user_information
-            data = {"type" => "game_end", "status" => "win"}
+            data = {"type" => "game_end", "status" => "win", "user_information" => winner_user_information.to_json}
             debug "server data : #{JSON.generate data}"
-            user_information.io.puts JSON.generate data
+            winner_user_information.io.puts JSON.generate data
 
-            data = {"type" => "game_end", "status" => "lose"}
+            data = {"type" => "game_end", "status" => "lose", "user_information" => winner_user_information.enemy_user_information.to_json}
             debug "server data : #{JSON.generate data}"
-            user_information.enemy_user_information.io.puts JSON.generate data
+            winner_user_information.enemy_user_information.io.puts JSON.generate data
 
             # 승리 정보 DB에 업데이트 하기
             # attr_accessible :number_of_wins, :number_of_combo, :name, :max_number_of_wins, :total_wins, :total_loses
-            user_information.user.number_of_wins += 1
-            user_information.user.total_wins += 1
-            if user_information.user.max_number_of_wins < user_information.user.number_of_wins
-              user_information.user.max_number_of_wins = user_information.user.number_of_wins
+            winner_user_information.user.number_of_wins += 1
+            winner_user_information.user.total_wins += 1
+            if winner_user_information.user.max_number_of_wins < winner_user_information.user.number_of_wins
+              winner_user_information.user.max_number_of_wins = winner_user_information.user.number_of_wins
             end
-            user_information.user.save
+            winner_user_information.user.save
 
-            user_information.enemy_user_information.user.total_loses += 1
-            user_information.enemy_user_information.user.number_of_wins = 0
-            user_information.enemy_user_information.user.save
+            winner_user_information.enemy_user_information.user.total_loses += 1
+            winner_user_information.enemy_user_information.user.number_of_wins = 0
+            winner_user_information.enemy_user_information.user.save
           end
 
         end
