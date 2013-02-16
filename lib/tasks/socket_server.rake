@@ -215,16 +215,7 @@ namespace :server do
             debug "에러 케이스 in game_end_check"
           end
 
-          # 클라이언트에 끝나면 끝났다는 정보 알려주기
           if winner_user_information
-            data = {"type" => "game_end", "status" => "win", "user_information" => winner_user_information.to_json}
-            debug "server data : #{JSON.generate data}"
-            winner_user_information.io.puts JSON.generate data
-
-            data = {"type" => "game_end", "status" => "lose", "user_information" => winner_user_information.enemy_user_information.to_json}
-            debug "server data : #{JSON.generate data}"
-            winner_user_information.enemy_user_information.io.puts JSON.generate data
-
             # 승리 정보 DB에 업데이트 하기
             # attr_accessible :number_of_wins, :number_of_combo, :name, :max_number_of_wins, :total_wins, :total_loses
             winner_user_information.user.number_of_wins += 1
@@ -237,6 +228,15 @@ namespace :server do
             winner_user_information.enemy_user_information.user.total_loses += 1
             winner_user_information.enemy_user_information.user.number_of_wins = 0
             winner_user_information.enemy_user_information.user.save
+
+            # 클라이언트에 끝나면 끝났다는 정보 알려주기
+            data = {"type" => "game_end", "status" => "win", "user_information" => winner_user_information.to_json}
+            debug "server data : #{JSON.generate data}"
+            winner_user_information.io.puts JSON.generate data
+
+            data = {"type" => "game_end", "status" => "lose", "user_information" => winner_user_information.enemy_user_information.to_json}
+            debug "server data : #{JSON.generate data}"
+            winner_user_information.enemy_user_information.io.puts JSON.generate data
           end
 
         end
