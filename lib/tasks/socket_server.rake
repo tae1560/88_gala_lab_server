@@ -233,7 +233,7 @@ namespace :server do
 
             user_information.enemy_user_information.user.total_loses += 1
             user_information.enemy_user_information.user.number_of_wins = 0
-            user_information.enemy_user_information.save
+            user_information.enemy_user_information.user.save
           end
 
         end
