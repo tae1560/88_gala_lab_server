@@ -133,7 +133,7 @@ namespace :server do
                 @@random_matching_waiting_queue.delete matching_user_information.user.id
 
                 matching_user.push matching_user_information
-                if matching_user_information.size >= 2
+                if matching_user.size >= 2
                   user_information1 = matching_user[0]
                   user_information2 = matching_user[1]
 
