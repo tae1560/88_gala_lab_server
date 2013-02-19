@@ -1,5 +1,6 @@
 # coding: utf-8
 
+is_daemon = false
 namespace :server do
   task :start => :environment do
     class UserInformation
@@ -491,12 +492,13 @@ namespace :server do
 
     debug "Server has been started"
 
-
-    #File.open("test.txt", "w") do | file |
-    #  file.puts $$
-    #  Process.daemon
-    #  file.puts $$
-    #end
+    if is_daemon
+      File.open("test.txt", "w") do | file |
+        file.puts $$
+        Process.daemon
+        file.puts $$
+      end
+    end
 
 
 
@@ -510,6 +512,7 @@ namespace :server do
   end
 
   task :daemon => :environment do
+    is_daemon = true
     Rake::Task["server:start"].execute
   end
 end
