@@ -127,28 +127,23 @@ namespace :server do
 
           matching_user = []
           while matching_user.size + @@random_matching_waiting_queue.size >= 2
-            if @@random_matching_waiting_queue.length >= 2
-              matching_user_information = @@logon_queue[@@random_matching_waiting_queue.first]
-              if matching_user_information
-                @@random_matching_waiting_queue.delete matching_user_information.user.id
+            matching_user_information = @@logon_queue[@@random_matching_waiting_queue.first]
+            if matching_user_information
+              @@random_matching_waiting_queue.delete matching_user_information.user.id
 
-                matching_user.push matching_user_information
-                if matching_user.size >= 2
-                  user_information1 = matching_user[0]
-                  user_information2 = matching_user[1]
+              matching_user.push matching_user_information
+              if matching_user.size >= 2
+                user_information1 = matching_user[0]
+                user_information2 = matching_user[1]
 
-                  matching_user.delete user_information1
-                  matching_user.delete user_information2
+                matching_user.delete user_information1
+                matching_user.delete user_information2
 
-                  send_matching_information_function.call user_information1, user_information2
-                end
-              else
-                debug "#{@@random_matching_waiting_queue.first} not in @@logon_queue"
-                @@random_matching_waiting_queue.delete @@random_matching_waiting_queue.first
+                send_matching_information_function.call user_information1, user_information2
               end
-              #matching 0, 1
-
-              #@@logon_queue = {} # id, user_information
+            else
+              debug "#{@@random_matching_waiting_queue.first} not in @@logon_queue"
+              @@random_matching_waiting_queue.delete @@random_matching_waiting_queue.first
             end
           end
         end
