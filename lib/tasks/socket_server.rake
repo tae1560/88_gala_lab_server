@@ -56,7 +56,7 @@ namespace :server do
         end
 
         # TODO : sorting 기준
-        users.sort!{|x,y| x["number_of_wins"] <=> y["number_of_wins"]}
+        users.sort!{|x,y| y["number_of_wins"] <=> x["number_of_wins"]}
 
         data = {"type" => "request_friends", "friends" => users}
         debug "server data : #{JSON.generate data}"
