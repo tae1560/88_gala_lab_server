@@ -423,7 +423,7 @@ namespace :server do
             # 사용자 정보를 받는다.
             user = doLogin io
             debug "user = #{user.inspect}"
-            
+
             # login validation
             if user and user.persisted? and @@logon_queue[user.id] == nil
               # login
@@ -445,9 +445,10 @@ namespace :server do
         ensure
           puts "ensure"
 
-          io.close
-
-          debug "#{io} has disconnected - on ensure"
+          unless io.closed?
+            io.close
+            debug "#{io} has disconnected - on ensure"
+          end
 
           if user
             @@logon_queue[user.id] = nil
