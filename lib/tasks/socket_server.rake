@@ -152,7 +152,7 @@ namespace :server do
 
       # 스킬 공격
       @@initial_hp = 100
-      @@skill_damages = {"1" => 10, "2" => 20, "3" => 30}
+      @@skill_damages = {"1" => 5, "2" => 10, "3" => 15}
       @@functions["attack_skill"] = lambda { |user_information, json_data|
         # skill_type, skill_time
         debug "client data : #{json_data.to_s}"
