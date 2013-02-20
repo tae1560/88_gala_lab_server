@@ -414,67 +414,53 @@ namespace :server do
     def client_logic(io)
       debug "#{io} has connected"
 
-      loop do
+      if io
         begin
           puts "begin"
 
-          # 사용자 정보를 받는다.
-          user = doLogin io
-          debug "user = #{user.inspect}"
+          loop do
+            # login validation
+            if user and user.persisted? and @@logon_queue[user.id] == nil
+              # login
+              user_information = UserInformation.new
+              user_information.user = user
+              user_information.io = io
+              @@logon_queue[user.id] = user_information
 
-          # login validation
-          if user and user.persisted? and @@logon_queue[user.id] == nil
-            # login
-            user_information = UserInformation.new
-            user_information.user = user
-            user_information.io = io
-            @@logon_queue[user.id] = user_information
-
-            # 받고 나서 서버 통신 시작
-            reading_socket user_information
+              # 받고 나서 서버 통신 시작
+              reading_socket user_information
+            else
+              # 사용자 정보를 받는다.
+              user = doLogin io
+              debug "user = #{user.inspect}"
+            end
           end
-
-            # 대기
         rescue
           puts "rescue"
           bt = $!.backtrace * "\n  "
           ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
+        ensure
+          puts "ensure"
+
+          io.close
+
+          debug "#{io} has disconnected - on ensure"
 
           if user
             @@logon_queue[user.id] = nil
             if @@friend_matching_waiting_queue.include? user.id
               @@friend_matching_waiting_queue.delete user.id
             end
-
             if @@random_matching_waiting_queue.include? user.id
               @@random_matching_waiting_queue.delete user.id
             end
           end
-
-          break
-        ensure
-          puts "ensure"
-
-          if io.closed?
-            debug "#{io} has disconnected - on ensure"
-
-            if user
-              @@logon_queue[user.id] = nil
-              if @@friend_matching_waiting_queue.include? user.id
-                @@friend_matching_waiting_queue.delete user.id
-              end
-              if @@random_matching_waiting_queue.include? user.id
-                @@random_matching_waiting_queue.delete user.id
-              end
-            end
-
-            break
-          end
         end
       end
-      io.close
 
-      debug "#{io} has disconnected"
+      if io.closed?
+        debug "#{io} has disconnected"
+      end
     end
 
     require 'socket'  # TCPServer
