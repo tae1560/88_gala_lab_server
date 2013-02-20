@@ -419,6 +419,11 @@ namespace :server do
           puts "begin"
 
           loop do
+
+            # 사용자 정보를 받는다.
+            user = doLogin io
+            debug "user = #{user.inspect}"
+            
             # login validation
             if user and user.persisted? and @@logon_queue[user.id] == nil
               # login
@@ -430,9 +435,7 @@ namespace :server do
               # 받고 나서 서버 통신 시작
               reading_socket user_information
             else
-              # 사용자 정보를 받는다.
-              user = doLogin io
-              debug "user = #{user.inspect}"
+
             end
           end
         rescue
