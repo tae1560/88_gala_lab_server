@@ -331,56 +331,65 @@ namespace :server do
     end
 
     # 사용자 정보를 받는다.
-    def doLogin(io, line)
+    def doLogin(io)
       str = ""
-      data = JSON.parse(line)
+      while line = io.gets;
+        begin
+          data = JSON.parse(line)
 
-      if data.has_key? 'type'
-        if data['type'] == "login"
-          id = data["id"]
-          password = data["password"]
+          if data.has_key? 'type'
+            if data['type'] == "login"
+              id = data["id"]
+              password = data["password"]
 
-          user = User.where(:login_id => id).where(:password => password).first
+              user = User.where(:login_id => id).where(:password => password).first
 
-          result = {}
-          result["type"] = "login"
-          if user
-            result["status"] = "success"
-            # TODO : UserInformation.to_json user 로 수정하기
-            result["user"] = user.to_json
-            # 내정보 받아오기
-          else
-            result["status"] = "failed"
-            result["message"] = "id or password is not valid"
+              result = {}
+              result["type"] = "login"
+              if user
+                result["status"] = "success"
+                # TODO : UserInformation.to_json user 로 수정하기
+                result["user"] = user.to_json
+                # 내정보 받아오기
+              else
+                result["status"] = "failed"
+                result["message"] = "id or password is not valid"
+              end
+
+              debug "server data : #{JSON.generate result}"
+              io.puts JSON.generate result
+
+              return user
+            elsif data['type'] == "join"
+              id = data["id"]
+              password = data["password"]
+              character = data["character"]
+
+              result = {}
+              result["type"] = "join"
+              user = User.new(:login_id => id, :password => password, :character => character)
+              if user.save
+                result["status"] = "success"
+                # TODO : UserInformation.to_json user 로 수정하기
+                result["user"] = user.to_json
+              else
+                result["status"] = "failed"
+                result["message"] = user.errors.full_messages
+              end
+
+              debug "server data : #{JSON.generate result}"
+              io.puts JSON.generate result
+
+              return user
+            end
           end
-
-          debug "server data : #{JSON.generate result}"
-          io.puts JSON.generate result
-
-          return user
-        elsif data['type'] == "join"
-          id = data["id"]
-          password = data["password"]
-          character = data["character"]
-
-          result = {}
-          result["type"] = "join"
-          user = User.new(:login_id => id, :password => password, :character => character)
-          if user.save
-            result["status"] = "success"
-            # TODO : UserInformation.to_json user 로 수정하기
-            result["user"] = user.to_json
-          else
-            result["status"] = "failed"
-            result["message"] = user.errors.full_messages
-          end
-
-          debug "server data : #{JSON.generate result}"
-          io.puts JSON.generate result
-
-          return user
+        rescue
+          bt = $!.backtrace * "\n  "
+          ($stderr << "error: #{$!.inspect}\n  #{bt}\n").flush
         end
+
       end
+      io.close
       return nil
     end
 
@@ -409,22 +418,22 @@ namespace :server do
         begin
           puts "begin"
 
-          user = nil
           loop do
 
             # 사용자 정보를 받는다.
+            user = doLogin io
             debug "user = #{user.inspect}"
 
             # login validation
             if user and user.persisted?
-              @@logon_queue[user.id] = nil
-              if @@friend_matching_waiting_queue.include? user.id
-                @@friend_matching_waiting_queue.delete user.id
+              if @@logon_queue[user.id]
+                if @@friend_matching_waiting_queue.include? user.id
+                  @@friend_matching_waiting_queue.delete user.id
+                end
+                if @@random_matching_waiting_queue.include? user.id
+                  @@random_matching_waiting_queue.delete user.id
+                end
               end
-              if @@random_matching_waiting_queue.include? user.id
-                @@random_matching_waiting_queue.delete user.id
-              end
-
             #  and @@logon_queue[user.id] == nil
               # login
               user_information = UserInformation.new
@@ -435,8 +444,7 @@ namespace :server do
               # 받고 나서 서버 통신 시작
               reading_socket user_information
             else
-              line = io.gets;
-              user = doLogin io, line
+
             end
           end
         rescue
